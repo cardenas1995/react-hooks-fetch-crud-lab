@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
-function QuestionForm(props) {
-  const [formData, setFormData] = useState({
+function QuestionForm({ questions }) {
+  const [formData, setFormData] = useState({ // uncategorized formData
     prompt: "",
     answer1: "",
     answer2: "",
@@ -10,16 +10,38 @@ function QuestionForm(props) {
     correctIndex: 0,
   });
 
+  const [data, setData] = useState({}); // the data we want to submit
+
   function handleChange(event) {
-    setFormData({
+    setFormData({ // setFormData copy the data from form but formData isn't what we submitting
       ...formData,
       [event.target.name]: event.target.value,
     });
+    setData({ // setData copy data from formData to data object and categorized to ready for submission
+      ...data,
+      prompt: formData.prompt,
+      answers: [
+        formData.answer1,
+        formData.answer2,
+        formData.answer3,
+        formData.answer4
+      ],
+      correctIndex: formData.correctIndex
+    })
   }
 
-  function handleSubmit(event) {
+  function handleSubmit(event) { // submit to db.json
     event.preventDefault();
-    console.log(formData);
+    console.log(data);
+    fetch("http://localhost:3001/questions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(data)
+    }).then(response => response.json())
+      .then(submittedData => setData([...questions, submittedData]));
   }
 
   return (
